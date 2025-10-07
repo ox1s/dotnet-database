@@ -14,6 +14,6 @@ var connectionString = jsonDoc
 var connectionFactory = new MsSqlConnectionFactory(connectionString!);
 var taskRepository = new TaskRepository(connectionFactory);
 var taskService = new TaskService(taskRepository);
-var menu = new Menu(taskService); 
-
+var taskConsoleView = new TaskConsoleView(taskService); 
+var menu = new Menu(taskService, taskConsoleView); 
 menu.DisplayMenu();

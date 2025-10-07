@@ -3,14 +3,16 @@ using System;
 using System.Net;
 using DataAccess.Repositories;
 using DataAccess.Entities;
+using Services;
+using System.Diagnostics;
 
 public class Menu
 {
 
-    private readonly ITaskRepository _taskRepository;
-    public Menu(ITaskRepository taskRepository)
+    private readonly TaskService _taskService;
+    public Menu(TaskService taskService)
     {
-        _taskRepository = taskRepository;
+        _taskService = taskService;
     }
     string? readResult;
     string greenWithArrow = " \u001b[32m >  ";
@@ -116,7 +118,7 @@ public class Menu
         do
         {
             Console.Write("Введите название задачи: ");
-            var title = Console.ReadLine() ?? "Не известно";
+            var title = Console.ReadLine() ?? "";
             Console.Write("Введите описание: ");
             var desc = Console.ReadLine() ?? "...";
 
@@ -128,8 +130,10 @@ public class Menu
                 CreatedAt = DateTime.Now
             };
 
-            _taskRepository.CreateTask(task);
+            _taskService.CreateTask(task);
             Console.WriteLine("Задача добавлена!");
+            Debug.Assert(task != null, $"{red}Task должен был создаться, но произошла фатальная ошибка");
+            PrintInfo(_taskService.GetTaskInfo(task.Id));
             Console.ReadKey();
             Console.Clear();
             Console.Write("Желаете добавить еще задачу? (y/n): ");
@@ -139,8 +143,6 @@ public class Menu
 
                 if (userInput == "y")
                 {
-                    Console.WriteLine("\nНажмите любую клавишу, чтобы продолжить...");
-                    Console.ReadKey();
                     Console.Clear();
                     isSelected = false;
                     validEntry = true;
@@ -158,43 +160,23 @@ public class Menu
             } while (!validEntry);
 
         } while (userInput == "y");
-
-
     }
 
     public void MarkAsCompleted()
     {
         PrintTasks(false);
         Console.WriteLine("================================");
-        int id = -1;
-        do
+        int? idToMarkAsCompleted = SelectTaskId("Какую задачу отметить выполненной?: ");
+        if (idToMarkAsCompleted.HasValue)
         {
-
-            Console.Write("Введите номер задачи: ");
-
-            if (int.TryParse(Console.ReadLine(), out int numberOfTask))
-            {
-                if (numberOfTask > 0 && numberOfTask <= _taskRepository.GetAllNotCompletedTasks().Count())
-                {
-                    validEntry = true;
-                    id = numberOfTask;
-                }
-            }
-            else
-            {
-                Console.WriteLine($"{red}❌ Вы ввели несуществующую задачу, повторите снова нажав на Enter");
-            }
-
-        } while (!validEntry);
-        _taskRepository.MarkAsCompleted(id);
-        Console.WriteLine("Задача отмечена!");
-        validEntry = true;
+            _taskService.MarkAsCompleted(idToMarkAsCompleted.Value);
+        }
         PauseToReturn();
     }
     public void PrintTasks(bool isCompletedTasks)
     {
-        var completedTasks = _taskRepository.GetAllCompletedTasks().ToList();
-        var notCompletedTasks = _taskRepository.GetAllNotCompletedTasks().ToList();
+        var completedTasks = _taskService.GetAllCompletedTasks().ToList();
+        var notCompletedTasks = _taskService.GetAllNotCompletedTasks().ToList();
 
         var checkedList = isCompletedTasks ? completedTasks.Any() : notCompletedTasks.Any();
         var tasksList = isCompletedTasks ? completedTasks : notCompletedTasks;
@@ -203,15 +185,15 @@ public class Menu
         Console.WriteLine(text + endColor);
         if (checkedList)
         {
-            foreach (var t in tasksList)
-                Console.WriteLine($"[{t.Id}] {t.Title} - {t.Description}");
+            foreach (var task in tasksList)
+                PrintInfo(task);
         }
         else
         {
             Console.WriteLine("(нет выполненных задач)");
         }
     }
-    public void ListTask(bool inAnotherOption = false)
+    public void ListTask(bool isInAnotherOption = false)
     {
         Console.Clear();
         Console.WriteLine("📋 Список задач:\n");
@@ -221,50 +203,61 @@ public class Menu
         PrintTasks(true);
         PrintTasks(false);
 
-        if (!inAnotherOption)
+        if (!isInAnotherOption)
         {
             PauseToReturn();
         }
+    }
+    public void PrintInfo(AppTask task)
+    {
+        Console.WriteLine($"[{task.Id}] {task.Title} - {task.Description}");
     }
 
 
     public void DeleteTask()
     {
         Console.Clear();
-        ListTask(true);
-        Console.WriteLine("================================");
-
-        bool validEntry = false;
-        int id = -1;
-
-        Console.Write("Введите номер задачи для удаления: ");
-
-        do
+        int? idToDelete = SelectTaskId("Введите номер задачи для удаления");
+        if (idToDelete.HasValue)
         {
-            if (int.TryParse(Console.ReadLine(), out int numberOfTask))
+            if (_taskService.DeleteTask(idToDelete.Value))
             {
-                var allTasks = _taskRepository.GetAllTasks().ToList();
-
-                if (allTasks.Any(t => t.Id == numberOfTask))
-                {
-                    validEntry = true;
-                    id = numberOfTask;
-                }
-                else
-                {
-                    Console.WriteLine("❌ Задача с таким номером не найдена. Повторите ввод:");
-                }
+                Console.WriteLine("\n✅ Задача успешно удалена!");
             }
             else
             {
-                Console.WriteLine("⚠️ Введите корректное число:");
+                Console.WriteLine("\n❌ Не удалось удалить задачу (возможно, она уже была удалена).");
             }
-
-        } while (!validEntry);
-
-        _taskRepository.DeleteTask(id);
-        Console.WriteLine("\n✅ Задача успешно удалена!");
+        }
         PauseToReturn();
+    }
+
+    int? SelectTaskId(string message)
+    {
+        Console.Clear();
+        ListTask(isInAnotherOption: true);
+        Console.WriteLine("===================================");
+
+        while (true)
+        {
+            Console.Write($"{message} или введите {red}q{endColor} для отмены: ");
+            string? input = Console.ReadLine();
+
+            if (input == "q")
+                return null;
+
+            if (int.TryParse(input, out int id))
+            {
+                if (_taskService.TaskExists(id))
+                    return id;
+                Console.WriteLine("❌ Задачи с таким номером не существует.");
+            }
+            else
+            {
+                Console.WriteLine("⚠️ Введите корректное число.");
+            }
+        }
+
     }
 
     void PauseToReturn()

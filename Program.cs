@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using DataAccess.Factories;
 using DataAccess.Repositories;
+using Services;
 
 var settingsText = File.ReadAllText("settings.json");
 using var jsonDoc = JsonDocument.Parse(settingsText);
@@ -11,9 +12,8 @@ var connectionString = jsonDoc
     .GetString();
 
 var connectionFactory = new MsSqlConnectionFactory(connectionString!);
-
 var taskRepository = new TaskRepository(connectionFactory);
+var taskService = new TaskService(taskRepository);
+var menu = new Menu(taskService); 
 
-
-var menu = new Menu(taskRepository);
 menu.DisplayMenu();

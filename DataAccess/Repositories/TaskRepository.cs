@@ -10,6 +10,9 @@ namespace DataAccess.Repositories
         IEnumerable<AppTask> GetAllTasks();
         IEnumerable<AppTask> GetAllCompletedTasks();
         IEnumerable<AppTask> GetAllNotCompletedTasks();
+        IEnumerable<string> GetTitlesLike(string pattern);
+        AppTask? GetTaskInfo(int id);
+        bool TaskExists(int id);
         void CreateTask(AppTask task);
         void MarkAsCompleted(int id);
         void DeleteTask(int id);
@@ -62,7 +65,43 @@ namespace DataAccess.Repositories
             }
 
         }
+        public AppTask? GetTaskInfo(int id)
+        {
+            using (IDbConnection dbConnection = _connectionFactory.CreateConnection())
+            {
+                return dbConnection.QueryFirstOrDefault<AppTask>(
+                    """
+                    SELECT * FROM Tasks
+                    WHERE id = @Id;
+                    """
+                    , new { Id = id });
+            }
 
+        }
+
+
+        public IEnumerable<string> GetTitlesLike(string pattern)
+        {
+            using (IDbConnection dbConnection = _connectionFactory.CreateConnection())
+            {
+                return dbConnection.Query<string>(
+                    """
+                    SELECT Title FROM Tasks WHERE Title LIKE @SearchPattern
+                    """
+                    , new { SearchPattern = pattern + "%" });
+            }
+        }
+        public bool TaskExists(int id)
+        {
+            using (IDbConnection dbConnection = _connectionFactory.CreateConnection())
+            {
+                return dbConnection.ExecuteScalar<bool>(
+                    """
+                    SELECT Count(1) FROM Tasks WHERE id = @Id
+                    """
+                    , new { Id = id });
+            }
+        }
 
         public void CreateTask(AppTask task)
         {

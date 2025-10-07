@@ -1,3 +1,6 @@
+
+using System;
+using System.Net;
 using DataAccess.Repositories;
 using DataAccess.Entities;
 
@@ -5,7 +8,6 @@ public class Menu
 {
 
     private readonly ITaskRepository _taskRepository;
-
     public Menu(ITaskRepository taskRepository)
     {
         _taskRepository = taskRepository;
@@ -114,9 +116,9 @@ public class Menu
         do
         {
             Console.Write("Введите название задачи: ");
-            var title = Console.ReadLine() ?? "";
+            var title = Console.ReadLine() ?? "Не известно";
             Console.Write("Введите описание: ");
-            var desc = Console.ReadLine() ?? "";
+            var desc = Console.ReadLine() ?? "...";
 
             var task = new AppTask
             {
@@ -145,7 +147,7 @@ public class Menu
                 }
                 else if (userInput == "n")
                 {
-                    PauseBeforeReturn();
+                    PauseToReturn();
                     validEntry = true;
                 }
                 else
@@ -160,6 +162,35 @@ public class Menu
 
     }
 
+    public void MarkAsCompleted()
+    {
+        PrintTasks(false);
+        Console.WriteLine("================================");
+        int id = -1;
+        do
+        {
+
+            Console.Write("Введите номер задачи: ");
+
+            if (int.TryParse(Console.ReadLine(), out int numberOfTask))
+            {
+                if (numberOfTask > 0 && numberOfTask <= _taskRepository.GetAllNotCompletedTasks().Count())
+                {
+                    validEntry = true;
+                    id = numberOfTask;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"{red}❌ Вы ввели несуществующую задачу, повторите снова нажав на Enter");
+            }
+
+        } while (!validEntry);
+        _taskRepository.MarkAsCompleted(id);
+        Console.WriteLine("Задача отмечена!");
+        validEntry = true;
+        PauseToReturn();
+    }
     public void PrintTasks(bool isCompletedTasks)
     {
         var completedTasks = _taskRepository.GetAllCompletedTasks().ToList();
@@ -192,51 +223,32 @@ public class Menu
 
         if (!inAnotherOption)
         {
-            Console.WriteLine("\nНажмите любую клавишу, чтобы вернуться в меню...");
-            Console.ReadKey();
-            isSelected = false;
+            PauseToReturn();
         }
     }
 
-
-    public void MarkAsCompleted()
-    {
-        ListTask(true); 
-        var taskId = AskForTaskId("Введите номер задачи для выполнения:");
-        if (taskId.HasValue)
-        {
-            _taskRepository.MarkAsCompleted(taskId.Value);
-            Console.WriteLine("\n✅ Задача отмечена как выполненная!");
-        }
-        PauseBeforeReturn();
-    }
 
     public void DeleteTask()
     {
+        Console.Clear();
         ListTask(true);
-        var taskId = AskForTaskId("Введите номер задачи для удаления:");
-        if (taskId.HasValue)
-        {
-            _taskRepository.DeleteTask(taskId.Value);
-            Console.WriteLine("\n✅ Задача успешно удалена!");
-        }
-        PauseBeforeReturn();
-    }
-
-    private int? AskForTaskId(string prompt)
-    {
         Console.WriteLine("================================");
-        Console.Write(prompt + " ");
 
-        var allTasks = _taskRepository.GetAllTasks().ToList();
+        bool validEntry = false;
+        int id = -1;
 
-        while (true)
+        Console.Write("Введите номер задачи для удаления: ");
+
+        do
         {
-            if (int.TryParse(Console.ReadLine(), out int taskId))
+            if (int.TryParse(Console.ReadLine(), out int numberOfTask))
             {
-                if (allTasks.Any(t => t.Id == taskId))
+                var allTasks = _taskRepository.GetAllTasks().ToList();
+
+                if (allTasks.Any(t => t.Id == numberOfTask))
                 {
-                    return taskId;
+                    validEntry = true;
+                    id = numberOfTask;
                 }
                 else
                 {
@@ -247,12 +259,17 @@ public class Menu
             {
                 Console.WriteLine("⚠️ Введите корректное число:");
             }
-        }
+
+        } while (!validEntry);
+
+        _taskRepository.DeleteTask(id);
+        Console.WriteLine("\n✅ Задача успешно удалена!");
+        PauseToReturn();
     }
 
-    private void PauseBeforeReturn()
+    void PauseToReturn()
     {
-        Console.WriteLine("Нажмите любую клавишу, чтобы вернуться в меню...");
+        Console.WriteLine("\nНажмите любую клавишу, чтобы вернуться в меню...");
         Console.ReadKey();
         isSelected = false;
     }

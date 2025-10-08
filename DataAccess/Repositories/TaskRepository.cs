@@ -13,7 +13,7 @@ namespace DataAccess.Repositories
         IEnumerable<string> GetTitlesLike(string pattern);
         AppTask? GetTaskInfo(int id);
         bool TaskExists(int id);
-        void CreateTask(AppTask task);
+        AppTask CreateTask(AppTask task);
         void MarkAsCompleted(int id);
         void DeleteTask(int id);
 
@@ -103,13 +103,14 @@ namespace DataAccess.Repositories
             }
         }
 
-        public void CreateTask(AppTask task)
+        public AppTask CreateTask(AppTask task)
         {
             using (IDbConnection dbConnection = _connectionFactory.CreateConnection())
             {
-                dbConnection.Execute(
+                return dbConnection.QuerySingle<AppTask>(
                     """
-                    INSERT INTO Tasks (Title, Description,IsCompleted, CreatedAt) 
+                    INSERT INTO Tasks (Title, Description, IsCompleted, CreatedAt) 
+                    OUTPUT INSERTED.*
                     VALUES(@Title, @Description, @IsCompleted, @CreatedAt)
                     """
                     , task);

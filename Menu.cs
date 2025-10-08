@@ -14,7 +14,7 @@ public class Menu
     {
         _options = new List<IMenuOption>
         {
-            new AddTaskOption(taskService),
+            new AddTaskOption(taskService, taskConsoleView),
             new ListTasksOption(taskConsoleView),
             new MarkAsCompletedOption(taskService, taskConsoleView),
             new DeleteTaskOption(taskService, taskConsoleView),

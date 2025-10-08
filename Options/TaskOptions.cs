@@ -7,12 +7,14 @@ namespace Options
     public class AddTaskOption : IMenuOption
     {
         private readonly TaskService _taskService;
+        private readonly TaskConsoleView _taskConsoleView;
 
         public string Name => "Добавить задачу";
 
-        public AddTaskOption(TaskService taskService)
+        public AddTaskOption(TaskService taskService, TaskConsoleView taskConsoleView)
         {
             _taskService = taskService;
+            _taskConsoleView = taskConsoleView;
         }
 
         public void Execute()
@@ -21,19 +23,25 @@ namespace Options
             Console.Write("Введите название задачи: ");
             var title = Console.ReadLine() ?? "";
             Console.Write("Введите описание: ");
-            var desciption = Console.ReadLine() ?? "...";
+            string description = Console.ReadLine() ?? ""; 
 
-            var task = new AppTask
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                description = "..."; 
+            }
+
+            var taskToCreate = new AppTask
             {
                 Title = title,
-                Description = desciption,
+                Description = description,
                 IsCompleted = false,
                 CreatedAt = DateTime.Now
             };
 
-            _taskService.CreateTask(task);
+            AppTask createdTask = _taskService.CreateTask(taskToCreate);
 
-            Console.WriteLine(ConsoleStyler.Green("✅ Задача успешно добавлена!\n"));
+            Console.WriteLine(ConsoleStyler.Green("\n✅ Задача успешно добавлена:"));
+            _taskConsoleView.PrintInfo(createdTask);
         }
     }
     public class DeleteTaskOption : IMenuOption

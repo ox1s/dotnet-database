@@ -4,10 +4,6 @@ public class TaskConsoleView
 {
     private readonly TaskService _taskService;
 
-    private const string green = "\u001b[32m";
-    private const string red = "\u001b[31m";
-    private const string endColor = "\u001b[0m";
-
     public TaskConsoleView(TaskService taskService)
     {
         _taskService = taskService;
@@ -15,7 +11,6 @@ public class TaskConsoleView
 
     public void DisplayAllTasks()
     {
-        Console.Clear();
         PrintTasksByStatus(true);
         PrintTasksByStatus(false);
     }
@@ -30,7 +25,7 @@ public class TaskConsoleView
 
         while (true)
         {
-            Console.Write($"{message} или введите {red}q{endColor} для отмены: ");
+            Console.Write($"{message} или введите {ConsoleStyler.Red("q")} для отмены: ");
             string? input = Console.ReadLine();
 
             if (input == "q")
@@ -40,7 +35,7 @@ public class TaskConsoleView
             {
                 if (_taskService.TaskExists(id))
                     return id;
-                Console.WriteLine($"{red}❌ Задачи с таким номером не существует.{endColor}");
+                Console.WriteLine(ConsoleStyler.Red($"❌ Задачи с таким номером не существует."));
             }
             else
             {
@@ -56,10 +51,10 @@ public class TaskConsoleView
             : _taskService.GetAllNotCompletedTasks();
 
         string text = isCompleted
-            ? $"{green}✅ Выполненные задачи:"
-            : $"{red}⌛ Не выполненные задачи:";
+            ? ConsoleStyler.Green($"✅ Выполненные задачи:")
+            : ConsoleStyler.Red($"⌛ Не выполненные задачи:");
 
-        Console.WriteLine(text + endColor);
+        Console.WriteLine(text);
 
         if (tasksList.Any())
         {

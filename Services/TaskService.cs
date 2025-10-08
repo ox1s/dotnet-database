@@ -21,7 +21,7 @@ namespace Services
             ? _taskRepository.GetTaskInfo(id)
             : null;
 
-        public void CreateTask(AppTask task)
+        public AppTask CreateTask(AppTask task)
         {
             if (string.IsNullOrWhiteSpace(task.Title))
             {
@@ -29,7 +29,7 @@ namespace Services
                 var existingTitles = new HashSet<string>(_taskRepository.GetTitlesLike(baseTitle));
                 task.Title = GenerateUniqueTitle(existingTitles, baseTitle);
             }
-            _taskRepository.CreateTask(task);
+            return _taskRepository.CreateTask(task);
         }
         private string GenerateUniqueTitle(HashSet<string> existingTitles, string baseTitle)
         {

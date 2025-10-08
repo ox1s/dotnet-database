@@ -33,9 +33,7 @@ namespace Options
 
             _taskService.CreateTask(task);
 
-            Console.WriteLine(ConsoleStyler.Green("✅ Задача\n"));
-            Console.WriteLine($"\t{title}\n\t{desciption}");
-            Console.WriteLine(ConsoleStyler.Green("успешно добавлена!"));
+            Console.WriteLine(ConsoleStyler.Green("✅ Задача успешно добавлена!\n"));
         }
     }
     public class DeleteTaskOption : IMenuOption
@@ -84,7 +82,15 @@ namespace Options
             int? idToMarkAsCompleted = _taskConsoleView.SelectTaskId("Введите номер задачи для отметки", allTasks: false);
             if (idToMarkAsCompleted.HasValue)
             {
-                _taskService.MarkAsCompleted(idToMarkAsCompleted.Value);
+
+                if (_taskService.MarkAsCompleted(idToMarkAsCompleted.Value))
+                {
+                    Console.WriteLine(ConsoleStyler.Green("\n✅ Задача успешно отмечена!"));
+                }
+                else
+                {
+                    Console.WriteLine(ConsoleStyler.Red($"\n❌ Не удалось отметить задачу (возможно, она уже была отмечена)."));
+                }
             }
         }
 

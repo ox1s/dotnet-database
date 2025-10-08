@@ -102,7 +102,6 @@ namespace Options
         {
             Console.Clear();
             Console.WriteLine("📋 Список задач:\n");
-            Console.ForegroundColor = ConsoleColor.Green;
             _taskConsoleView.DisplayAllTasks();
         }
 

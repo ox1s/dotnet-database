@@ -16,12 +16,8 @@ public class TaskConsoleView
     public void DisplayAllTasks()
     {
         Console.Clear();
-        Console.WriteLine("📋 Список задач:\n");
-        var tasks = _taskService.GetAllTasks();
-        foreach (var task in tasks)
-        {
-            PrintInfo(task);
-        }
+        PrintTasksByStatus(true);
+        PrintTasksByStatus(false);
     }
 
     public int? SelectTaskId(string message, bool allTasks = true)

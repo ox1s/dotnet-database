@@ -13,6 +13,10 @@ try
         .GetProperty("DefaultConnection")
         .GetString();
 
+    var dbConnectionFactory = new MsSqlConnectionFactory(connectionString!);
+    var dbSetup = new DatabaseSetup(dbConnectionFactory);
+    dbSetup.Setup();
+
     var connectionFactory = new MsSqlConnectionFactory(connectionString!);
     var taskRepository = new TaskRepository(connectionFactory);
     var taskService = new TaskService(taskRepository);

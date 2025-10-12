@@ -1,8 +1,7 @@
-namespace Options
+namespace Options;
+
+public interface IMenuOption
 {
-    public interface IMenuOption
-    {
-        string Name { get; }
-        void Execute();
-    }
+    string Name { get; }
+    void Execute();
 }

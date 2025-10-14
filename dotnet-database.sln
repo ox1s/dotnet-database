@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-database", "dotnet-database.csproj", "{B6E98E96-E54B-9D5A-C069-E8A3F20C9F51}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskManager.Tests", "..\TaskManager.Tests\TaskManager.Tests.csproj", "{37483E4B-B6E8-486E-9895-2A3C86E67586}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,10 @@ Global
 		{B6E98E96-E54B-9D5A-C069-E8A3F20C9F51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6E98E96-E54B-9D5A-C069-E8A3F20C9F51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6E98E96-E54B-9D5A-C069-E8A3F20C9F51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37483E4B-B6E8-486E-9895-2A3C86E67586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37483E4B-B6E8-486E-9895-2A3C86E67586}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37483E4B-B6E8-486E-9895-2A3C86E67586}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37483E4B-B6E8-486E-9895-2A3C86E67586}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
